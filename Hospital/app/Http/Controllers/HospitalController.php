@@ -70,9 +70,9 @@ class HospitalController extends Controller
         $hospital->delete();
 
         return response()->json([
-            'code' => Response::HTTP_NO_CONTENT,
+            'code' => Response::HTTP_OK,
             'message' => 'Hospital eliminado correctamente',
             'data' => null
-        ], Response::HTTP_NO_CONTENT);
+        ], Response::HTTP_OK);
     }
 }
