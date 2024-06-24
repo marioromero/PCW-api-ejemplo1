@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('ciudad');
             $table->date('fecha_inauguracion');
             $table->integer('camas_disponibles');
+            $table->boolean('');
         });
     }
 

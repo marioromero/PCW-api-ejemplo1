@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Hospital;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 
 class HospitalController extends Controller
 {
@@ -27,20 +28,46 @@ class HospitalController extends Controller
      */
     public function store(Request $request)
     {
-        $hospital = Hospital::create($request->all());
+        try {
+            $request->validate([
+                'nombre' => 'required',
+                'ciudad' => 'required',
+                'fecha_inauguracion' => 'required|date',
+                'camas_disponibles' => 'required|integer',
+            ]);
 
-        return response()->json([
-            'code' => Response::HTTP_CREATED,
-            'message' => 'Hospital creado correctamente',
-            'data' => $hospital
-        ], Response::HTTP_CREATED);
+            $hospital = Hospital::create($request->all());
+
+            return response()->json([
+                'code' => Response::HTTP_CREATED,
+                'message' => 'Hospital creado correctamente',
+                'data' => $hospital
+            ], Response::HTTP_CREATED);
+
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'code' => Response::HTTP_UNPROCESSABLE_ENTITY,
+                'message' => 'Los datos proporcionados no son válidos',
+                'errors' => $exception->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Hospital $hospital)
+    public function show($id)
     {
+        $hospital = Hospital::find($id);
+
+        if (!$hospital) {
+            return response()->json([
+                'code' => Response::HTTP_NOT_FOUND,
+                'message' => 'Hospital no encontrado',
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         return response()->json([
             'code' => Response::HTTP_OK,
             'message' => 'Hospital encontrado correctamente',
@@ -51,8 +78,18 @@ class HospitalController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Hospital $hospital)
+    public function update(Request $request, $id)
     {
+        $hospital = Hospital::find($id);
+
+        if (!$hospital) {
+            return response()->json([
+                'code' => Response::HTTP_NOT_FOUND,
+                'message' => 'Hospital no encontrado',
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $hospital->update($request->all());
 
         return response()->json([
@@ -65,8 +102,18 @@ class HospitalController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Hospital $hospital)
+    public function destroy($id)
     {
+        $hospital = Hospital::find($id);
+
+        if (!$hospital) {
+            return response()->json([
+                'code' => Response::HTTP_NOT_FOUND,
+                'message' => 'Hospital no encontrado',
+                'data' => null
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $hospital->delete();
 
         return response()->json([
